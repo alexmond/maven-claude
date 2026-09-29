@@ -1,0 +1,79 @@
+name: Maven Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version (numeric, e.g. 0.1.0)'
+        required: true
+      nextVersion:
+        description: 'Next development version (with -SNAPSHOT suffix)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # push the version-bump commits + tag, and create the GitHub release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+          server-id: central
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Configure Git User
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Prepare Release
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ github.event.inputs.releaseVersion }} -DgenerateBackupPoms=false --no-transfer-progress
+          git commit -am "Prepare release ${{ github.event.inputs.releaseVersion }}"
+          git tag -a ${{ github.event.inputs.releaseVersion }} -m "Release ${{ github.event.inputs.releaseVersion }}"
+
+      - name: Copy Maven settings.xml
+        run: |
+          mkdir -p ~/.m2
+          cp .github/settings.xml ~/.m2/settings.xml
+
+      # Full verify (including the invoker ITs) against the release version first, then
+      # publish; the release profile skips the ITs so they don't run twice.
+      - name: Verify
+        run: ./mvnw --batch-mode verify --no-transfer-progress
+
+      - name: Deploy to Maven Central
+        run: ./mvnw --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} clean deploy -Prelease --no-transfer-progress
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Prepare for Next Development Version
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ github.event.inputs.nextVersion }} -DgenerateBackupPoms=false --no-transfer-progress
+          git commit -am "Prepare for next development iteration: ${{ github.event.inputs.nextVersion }}"
+
+      - name: Push Changes
+        run: git push && git push --tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          name: Release ${{ github.event.inputs.releaseVersion }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="demo.CalcTest" time="0.04" tests="3" errors="1" skipped="0" failures="1">
+  <properties><property name="java.version" value="25"/></properties>
+  <testcase name="rejectsNegative" classname="demo.CalcTest" time="0.008">
+    <error message="negative input: -1" type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: negative input: -1
+	at demo.Calc.helper(Calc.java:11)
+	at demo.Calc.add(Calc.java:6)
+	at demo.CalcTest.rejectsNegative(CalcTest.java:16)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:787)
+Caused by: java.io.UncheckedIOException: disk full
+	at demo.Calc.helper(Calc.java:10)
+]]></error>
+  </testcase>
+  <testcase name="addsNumbers" classname="demo.CalcTest" time="0.002">
+    <failure message="expected: &lt;4&gt; but was: &lt;5&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <4> but was: <5>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at app//demo.CalcTest.addsNumbers(CalcTest.java:11)
+]]></failure>
+  </testcase>
+  <testcase name="passes" classname="demo.CalcTest" time="0.001"/>
+</testsuite>

@@ -1,0 +1,17 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# OS
+.DS_Store
+
+# Claude Code: machine-local settings and per-user plugin state
+.claude/settings.local.json
+.claude/prompt-coach/
+.claude/evolving-claude-md/

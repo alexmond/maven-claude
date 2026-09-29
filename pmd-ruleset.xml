@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<ruleset name="claude-maven-plugin PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>PMD ruleset for claude-maven-plugin</description>
+
+    <!-- Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="LooseCoupling"/>
+        <exclude name="UseVarargs"/>
+        <exclude name="LiteralsFirstInComparisons"/>
+        <exclude name="GuardLogStatement"/> <!-- SLF4J parameterized logging avoids the cost this rule guards against -->
+        <exclude name="AvoidReassigningParameters"/>
+        <exclude name="SystemPrintln"/> <!-- Goal answers (claude:source) go to stdout even under -q -->
+        <exclude name="PreserveStackTrace"/> <!-- Intentional rethrow patterns -->
+        <exclude name="UnusedAssignment"/> <!-- False positives on field assignments in try/catch branches -->
+        <exclude name="UnusedFormalParameter"/> <!-- Interface compliance and future-proofing -->
+    </rule>
+
+    <!-- Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="ConfusingTernary"/>
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="UseExplicitTypes"/>
+        <exclude name="UselessParentheses"/> <!-- Spring formatter controls parentheses style -->
+    </rule>
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*"/>
+        </properties>
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <exclude name="ImmutableField"/> <!-- Spring injects values into fields -->
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="DataClass"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="ExcessiveImports"/>
+        <exclude name="CouplingBetweenObjects"/>
+        <exclude name="AvoidCatchingGenericException"/>
+        <exclude name="ExcessiveParameterList"/>
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="NcssCount"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="GodClass"/>
+        <exclude name="TooManyFields"/>
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="CognitiveComplexity"/>
+        <exclude name="ExceptionAsFlowControl"/> <!-- Used for validation flow control -->
+        <exclude name="SimplifyBooleanReturns"/>
+        <exclude name="CollapsibleIfStatements"/>
+        <exclude name="UseUtilityClass"/> <!-- Spring Boot Application class has static main -->
+        <exclude name="AvoidUncheckedExceptionsInSignatures"/> <!-- Methods declare specific runtime exceptions -->
+        <exclude name="AvoidDeeplyNestedIfStmts"/>
+    </rule>
+
+    <!-- Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="NonSerializableClass"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidFieldNameMatchingTypeName"/>
+        <exclude name="NullAssignment"/>
+        <exclude name="ReturnEmptyCollectionRatherThanNull"/>
+        <exclude name="DoNotTerminateVM"/> <!-- CLI application uses System.exit() for exit codes -->
+        <exclude name="AvoidInstanceofChecksInCatchClause"/> <!-- Catch blocks pattern-match exception types -->
+        <exclude name="CloseResource"/> <!-- HttpClient lifecycle managed outside method scope -->
+        <exclude name="TestClassWithoutTestCases"/> <!-- JUnit XML model classes (Testcase, Testsuite) are not test classes -->
+        <exclude name="InvalidLogMessageFormat"/> <!-- False positives with SLF4J parameterized logging -->
+        <exclude name="EmptyCatchBlock"/> <!-- Configured below: commented catch blocks are allowed -->
+        <exclude name="UseProperClassLoader"/> <!-- J2EE rule; Maven's class realms need the loader of a specific class -->
+    </rule>
+    <!-- The extension must never break a build, so it swallows failures on purpose; each
+         such catch block carries a comment saying why. -->
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock">
+        <properties>
+            <property name="allowCommentedBlocks" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- Multithreading -->
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="AvoidSynchronizedStatement"/> <!-- Virtual-thread pinning advice; Maven builder threads are platform threads -->
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
+        <exclude name="AvoidUsingVolatile"/> <!-- Single-writer flags read across threads -->
+    </rule>
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+        <exclude name="AvoidFileStream"/>
+        <exclude name="ConsecutiveAppendsShouldReuse"/>
+        <exclude name="InsufficientStringBufferDeclaration"/>
+        <exclude name="InefficientStringBuffering"/>
+        <exclude name="RedundantFieldInitializer"/>
+        <exclude name="ConsecutiveLiteralAppends"/> <!-- Renderers read better as one append per piece -->
+    </rule>
+
+</ruleset>
